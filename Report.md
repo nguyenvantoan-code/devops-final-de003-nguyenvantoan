@@ -271,3 +271,67 @@ Sau khi pipeline hoàn tất, bạn chụp 4 ảnh màn hình sau:
    git push origin main
    ```
 3. Nộp link GitHub repository public lên hệ thống RAIA.
+Cách 1: Áp dụng quyền Docker ngay lập tức (Nếu lúc trước bạn đã dùng lệnh usermod)
+
+Gõ lệnh sau để terminal load lại danh sách nhóm quyền (bao gồm quyền docker):
+
+Bash
+newgrp docker
+Chạy lại lệnh hiển thị container:
+
+Bash
+docker compose --env-file student.env ps
+Cách 2: Chuyển sang dùng tài khoản root (Chắc chắn thành công)
+Nếu cách 1 vẫn báo permission denied, bạn hãy mượn quyền root để chạy lệnh chụp ảnh:
+
+Gõ lệnh chuyển sang tài khoản quản trị viên:
+
+Bash
+su -
+(Nhập mật khẩu root của server)
+
+Di chuyển thẳng tới thư mục chứa code của bạn:
+
+Bash
+cd /home/toandev/devops-final-de001-nguyenvantoan
+Chạy lệnh hiển thị container:
+
+Bash
+docker compose --env-file student.env ps
+Bash
+cat /root/.ssh/authorized_keys
+Hãy nhìn kỹ xem đoạn mã in ra có bị thiếu chữ, cắt cụt, hoặc lẫn ký tự rác do bạn bấm nhầm bàn phím lúc bị treo không. Nó phải là một dòng chữ dài liền mạch bắt đầu bằng ssh-ed25519.... Nếu thấy sai hoặc trống trơn, bạn cần dùng nano mở ra xóa đi dán lại cho đúng.
+
+2. Phân quyền thư mục bị lỏng (SSH rất khắt khe)
+Nếu quyền của thư mục .ssh hoặc file bên trong quá lỏng lẻo, SSH daemon trên Linux sẽ tự động vô hiệu hóa tính năng đăng nhập bằng khóa. Hãy chạy 2 lệnh này trên server để chuẩn hóa lại:
+
+Bash
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/authorized_keys
+3. Server cấm đăng nhập thẳng bằng tài khoản Root (Khả năng cao nhất)
+Đa số các máy chủ Linux đều cấu hình mặc định cấm tài khoản root đăng nhập từ xa qua SSH vì lý do bảo mật (chỉ cho phép user thường đăng nhập rồi dùng lệnh su để chuyển quyền).
+Cách kiểm tra: Trên máy Windows của bạn, mở terminal mới tinh và thử gõ ssh root@<IP_SERVER>. Nếu nó văng ra lỗi Permission denied ngay lập tức, chứng tỏ server đã cấm SSH root.
+
+💡 Giải pháp "cứu net" nhanh nhất để nộp bài (Khuyên dùng):
+Thay vì loay hoay sửa cấu hình cho root, bạn hãy quay về dùng tài khoản toandev ban đầu. Vì hiện tại bạn đã có thể truy cập vào tài khoản root trên terminal, hãy dùng chính quyền root đó để "giải cứu" tài khoản toandev khỏi lỗi Docker ban nãy:
+
+Đang đứng ở tài khoản root trên server, gõ lệnh này để cấp quyền Docker cho Toàn:
+
+Bash
+usermod -aG docker toandev
+sudo chown -R $USER:$USER ~/.ssh
+(Nếu hệ thống hỏi mật khẩu, hãy nhập mật khẩu của tài khoản toandev)
+
+Cấp quyền chuẩn cho thư mục .ssh (Chỉ chủ sở hữu mới có quyền đọc/ghi/thực thi):
+
+Bash
+chmod 700 ~/.ssh
+Tạo file authorized_keys (nếu chưa có) và cấp quyền chuẩn cho file:
+
+Bash
+touch ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+Mở lại trình soạn thảo để dán Public Key:
+
+Bash
+nano ~/.ssh/authorized_keys
