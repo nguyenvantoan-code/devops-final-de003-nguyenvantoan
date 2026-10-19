@@ -31,7 +31,6 @@ WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 # Chỉ lấy file JAR từ stage build
 COPY --from=build /workspace/build/libs/app.jar /app/app.jar
-USER spring:spring
 
 EXPOSE 8080
 
